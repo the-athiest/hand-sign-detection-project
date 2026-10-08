@@ -21,12 +21,21 @@ export class DetectionWebSocket {
       return;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    let wsUrl = `${protocol}//${window.location.host}/ws/detect`;
+    const configuredWsUrl = import.meta.env.VITE_WS_URL;
+    let wsUrl = configuredWsUrl;
 
-    // In dev mode when running on port 5173 without proxy or direct port
-    if (window.location.port === '5173') {
-      wsUrl = 'ws://127.0.0.1:8000/ws/detect';
+    if (!wsUrl) {
+      const backendUrl = typeof process !== 'undefined' ? process.env?.BACKEND_URL : null;
+      if (backendUrl) {
+        const wsProto = backendUrl.startsWith('https') ? 'wss:' : 'ws:';
+        const cleanHost = backendUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        wsUrl = `${wsProto}//${cleanHost}/ws/detect`;
+      } else if (window.location.port === '5173') {
+        wsUrl = 'ws://127.0.0.1:8000/ws/detect';
+      } else {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        wsUrl = `${protocol}//${window.location.host}/ws/detect`;
+      }
     }
 
     this.onStatusChange?.('CONNECTING');

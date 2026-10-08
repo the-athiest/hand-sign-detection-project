@@ -133,6 +133,24 @@ def process_image_frame(img: np.ndarray) -> Dict[str, Any]:
     }
 
 
+@app.get("/")
+@app.get("/api")
+async def root():
+    """Root info endpoint for service verification."""
+    return {
+        "status": "healthy",
+        "service": "HandSense AI Backend",
+        "version": "1.0.0",
+        "endpoints": {
+            "health": "/api/health",
+            "signs": "/api/signs",
+            "detect": "/api/detect",
+            "detect_file": "/api/detect-file",
+            "websocket": "/ws/detect"
+        }
+    }
+
+
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint providing runtime and version info."""
